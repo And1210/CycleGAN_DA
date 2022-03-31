@@ -50,8 +50,8 @@ class CARLADataset(BaseDataset):
     #This function returns an data, label pair. All data processing and modification should be done by the end of this function
     def __getitem__(self, index):
         sim_filename = self.sim_img_paths[index]
-        # real_filename = random.choice(self.real_img_paths)
-        real_filename = self.real_img_paths[index]
+        real_filename = random.choice(self.real_img_paths)
+        # real_filename = self.real_img_paths[index]
 
         #Image loading assuming the images are in the 'images' folder in the dataset root path
         sim_image = Image.open(sim_filename)

@@ -2,8 +2,8 @@
     "train_dataset_params": {
         "dataset_name": "CARLA",
         "dataset_path": "/drive/datasets/CARLA2CityScapes/images/train",
-        "sim_data_folder": "CARLA",
-        "real_data_folder": "CityScapesInput",
+        "sim_data_folder": "CityScapesGT_quantized_kmeans",
+        "real_data_folder": "CARLA_quantized_kmeans",
         "stage": "train",
         "loader_params": {
             "batch_size": 1,
@@ -16,8 +16,8 @@
     "val_dataset_params": {
         "dataset_name": "CARLA",
         "dataset_path": "/drive/datasets/CARLA2CityScapes/images/train",
-        "sim_data_folder": "CARLA",
-        "real_data_folder": "CityScapesInput",
+        "sim_data_folder": "CityScapesGT",
+        "real_data_folder": "CARLA",
         "stage": "val",
         "loader_params": {
             "batch_size": 1,

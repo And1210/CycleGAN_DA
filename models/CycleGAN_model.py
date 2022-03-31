@@ -145,7 +145,7 @@ class CycleGANmodel(BaseModel):
         self.discriminator_recon.cuda()
 
         #Define loss function
-        self.criterion_loss = nn.BCELoss().cuda()
+        self.criterion_loss = nn.BCEWithLogitsLoss().cuda()
         self.l1_loss = nn.L1Loss().cuda()
 
         #Define optimizer
@@ -184,6 +184,9 @@ class CycleGANmodel(BaseModel):
 
     #Computes the loss with the specified name (in this case 'total')
     def compute_loss(self):
+        lambda_consistency = 10
+        lambda_identity = 1
+
         valid = torch.ones((self.output_trans.shape[0], *self.discriminator_trans.output_shape), requires_grad=False).to(self.device)
         fake = torch.zeros((self.output_trans.shape[0], *self.discriminator_trans.output_shape), requires_grad=False).to(self.device)
 
@@ -212,7 +215,7 @@ class CycleGANmodel(BaseModel):
         self.loss_identity = self.l1_loss(self.output_recon_identity, self.input)
         self.loss_identity_trg = self.l1_loss(self.output_trans_identity, self.target)
 
-        self.loss_g = self.loss_g_trans + self.loss_g_recon + self.loss_consistency + self.loss_consistency_trg + self.loss_identity + self.loss_identity_trg
+        self.loss_g = self.loss_g_trans + self.loss_g_recon + lambda_consistency*(self.loss_consistency + self.loss_consistency_trg) + lambda_identity*(self.loss_identity + self.loss_identity_trg)
         self.loss_d = self.loss_d_trans + self.loss_d_recon
 
 
