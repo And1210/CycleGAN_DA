@@ -7,6 +7,7 @@ from utils.visualizer import Visualizer
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 
 """Performs validation of a specified model.
 
@@ -35,9 +36,7 @@ def validate(configuration):
 
     #Loops through all validation data and runs though model
     bs = configuration['val_dataset_params']['loader_params']['batch_size']
-    for i, data in enumerate(val_dataset):
-        # if (i < 470):
-        #     continue
+    for i, data in tqdm(enumerate(val_dataset)):
         model.set_input(data)  # unpack data from data loader
         # print(model.input.shape)
         model.test()           # run inference
@@ -45,14 +44,13 @@ def validate(configuration):
             # img = model.input[j].permute(1, 2, 0).cpu().detach().numpy()
             # trg = model.target[j].permute(1, 2, 0).cpu().detach().numpy()
             # out_img = model.output[j].permute(1, 2, 0).cpu().detach().numpy()
-            out_trg_img = model.output_trg[j].permute(1, 2, 0).cpu().detach().numpy()
+            out_trg_img = model.fake_B[j].permute(1, 2, 0).cpu().detach().numpy()
 
             #Save images
             out_trg_img = out_trg_img * 255
             out_trg_img = out_trg_img.astype(np.uint8)
             output = Image.fromarray(out_trg_img)
-            output = output.resize((2048, 1024))
-            output.save(val_dataset.dataset.real_img_paths[i*bs+j].replace('/val', '/val_autoencoded_db_0.75'))
+            output.save(val_dataset.dataset.sim_img_paths[i*bs+j].replace('/val_quantized_kmeans_cs', '/val_cyclegan_quantized_cs'))
 
     #Where results are calculated and visualized
     # model.post_epoch_callback(configuration['model_params']['load_checkpoint'], visualizer)

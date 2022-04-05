@@ -11,7 +11,8 @@
             "num_workers": 1,
             "pin_memory": true
         },
-        "input_size": [128, 128]
+        "input_size": [128, 128],
+        "normalize_size": [1024, 512]
     },
     "val_dataset_params": {
         "dataset_name": "CARLA",
@@ -25,7 +26,8 @@
             "num_workers": 1,
             "pin_memory": true
         },
-        "input_size": [128, 128]
+        "input_size": [128, 128],
+        "normalize_size": [1024, 512]
     },
     "model_params": {
         "model_name": "CycleGAN",
@@ -50,6 +52,6 @@
     "visualization_params_validation": {
         "name": "AutoEncoder"
     },
-    "printout_freq": 100,
+    "printout_freq": 200,
     "model_update_freq": 1
 }

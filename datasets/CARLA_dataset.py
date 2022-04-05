@@ -24,6 +24,7 @@ class CARLADataset(BaseDataset):
         self._stage = configuration["stage"]
 
         self._image_size = tuple(configuration["input_size"])
+        self._normalize_size = tuple(configuration["normalize_size"])
 
         self.dataset_path = os.path.join(configuration["dataset_path"])#, "{}".format(self._stage))
 
@@ -43,6 +44,7 @@ class CARLADataset(BaseDataset):
         self._transform = transforms.Compose(
             [
                 transforms.ToPILImage(),
+                transforms.RandomCrop(self._image_size),
                 transforms.ToTensor(),
             ]
         )
@@ -62,8 +64,9 @@ class CARLADataset(BaseDataset):
         real_image = real_image.astype(np.uint8)
 
         #Image resizing
-        sim_image = cv2.resize(sim_image, self._image_size)
-        real_image = cv2.resize(real_image, self._image_size)
+        if (self._stage == 'train'):
+            sim_image = cv2.resize(sim_image, self._normalize_size)
+            real_image = cv2.resize(real_image, self._normalize_size)
 
         #Image formatting
         sim_image = np.dstack([sim_image] * 1)

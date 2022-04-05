@@ -92,7 +92,7 @@ class Discriminator(nn.Module):
             in_filters = out_filters
 
         layers.append(nn.Conv2d(out_filters, 1, kernel_size=3, stride=1, padding=1))
-        layers.append(nn.Sigmoid())
+        # layers.append(nn.Sigmoid())
 
         self.model = nn.Sequential(*layers)
 
@@ -147,6 +147,7 @@ class CycleGANmodel(BaseModel):
         #Define loss function
         self.criterion_loss = nn.BCEWithLogitsLoss().cuda()
         self.l1_loss = nn.L1Loss().cuda()
+        self.mse_loss = nn.MSELoss().cuda()
 
         #Define optimizer
         self.optimizer_g = torch.optim.Adam(
@@ -185,15 +186,15 @@ class CycleGANmodel(BaseModel):
     #Computes the loss with the specified name (in this case 'total')
     def compute_loss(self):
         lambda_consistency = 10
-        lambda_identity = 1
+        lambda_identity = 0.5
 
         valid = torch.ones((self.output_trans.shape[0], *self.discriminator_trans.output_shape), requires_grad=False).to(self.device)
         fake = torch.zeros((self.output_trans.shape[0], *self.discriminator_trans.output_shape), requires_grad=False).to(self.device)
 
         #Adversarial loss
-        self.target_logits = self.discriminator_trans(self.target)
+        # self.target_logits = self.discriminator_trans(self.target)
         self.trans_logits = self.discriminator_trans(self.output_trans)
-        self.input_logits = self.discriminator_recon(self.input)
+        # self.input_logits = self.discriminator_recon(self.input)
         self.recon_logits = self.discriminator_recon(self.output_recon)
 
         self.loss_g_trans = self.criterion_loss(self.trans_logits, valid)
@@ -208,12 +209,12 @@ class CycleGANmodel(BaseModel):
         self.loss_d_recon = (self.criterion_loss(self.recon_logits, fake) + self.criterion_loss(self.input_logits, valid))/2
 
         #Consistency loss
-        self.loss_consistency = self.l1_loss(self.output_recon, self.input)
-        self.loss_consistency_trg = self.l1_loss(self.output_trans_trg, self.target)
+        self.loss_consistency = self.mse_loss(self.output_recon, self.input)
+        self.loss_consistency_trg = self.mse_loss(self.output_trans_trg, self.target)
 
         #Identity loss
-        self.loss_identity = self.l1_loss(self.output_recon_identity, self.input)
-        self.loss_identity_trg = self.l1_loss(self.output_trans_identity, self.target)
+        self.loss_identity = self.mse_loss(self.output_recon_identity, self.input)
+        self.loss_identity_trg = self.mse_loss(self.output_trans_identity, self.target)
 
         self.loss_g = self.loss_g_trans + self.loss_g_recon + lambda_consistency*(self.loss_consistency + self.loss_consistency_trg) + lambda_identity*(self.loss_identity + self.loss_identity_trg)
         self.loss_d = self.loss_d_trans + self.loss_d_recon

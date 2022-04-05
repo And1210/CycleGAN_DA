@@ -140,12 +140,14 @@ class BaseModel(ABC):
                 load_filename = '{0}_net_{1}.pth'.format(epoch, name)
                 load_path = os.path.join(self.save_dir, load_filename)
                 net = getattr(self, name)
-                if isinstance(net, torch.nn.DataParallel):
-                    net = net.module
+                # if isinstance(net, torch.nn.DataParallel):
+                    # net = net.module
                 print('loading the model from {0}'.format(load_path))
                 state_dict = torch.load(load_path, map_location=self.device)
                 if hasattr(state_dict, '_metadata'):
                     del state_dict._metadata
+
+                # print(state_dict.keys())
 
                 net.load_state_dict(state_dict)
 
@@ -187,12 +189,25 @@ class BaseModel(ABC):
                 print('[Network {0}] Total number of parameters : {1:.3f} M'.format(name, num_params / 1e6))
 
 
-    def set_requires_grad(self, requires_grad=False):
-        """Set requies_grad for all the networks to avoid unnecessary computations.
+    # def set_requires_grad(self, requires_grad=False):
+    #     """Set requies_grad for all the networks to avoid unnecessary computations.
+    #     """
+    #     for name in self.network_names:
+    #         if isinstance(name, str):
+    #             net = getattr(self, name)
+    #             for param in net.parameters():
+    #                 param.requires_grad = requires_grad
+
+    def set_requires_grad(self, nets, requires_grad=False):
+        """Set requies_grad=Fasle for all the networks to avoid unnecessary computations
+        Parameters:
+            nets (network list)   -- a list of networks
+            requires_grad (bool)  -- whether the networks require gradients or not
         """
-        for name in self.network_names:
-            if isinstance(name, str):
-                net = getattr(self, name)
+        if not isinstance(nets, list):
+            nets = [nets]
+        for net in nets:
+            if net is not None:
                 for param in net.parameters():
                     param.requires_grad = requires_grad
 
@@ -234,11 +249,14 @@ class BaseModel(ABC):
                 traced_script_module = torch.jit.trace(net, self.input)
                 traced_script_module.save(export_path)
 
-
     def get_current_visuals(self):
-        """Return visualization images. train.py will display these images."""
+        """Return visualization images. train.py will display these images with visdom, and save the images to a HTML"""
         visual_ret = OrderedDict()
         for name in self.visual_names:
             if isinstance(name, str):
                 visual_ret[name] = getattr(self, name)
         return visual_ret
+
+    def compute_visuals(self):
+        """Calculate additional output images for visdom and HTML visualization"""
+        pass
